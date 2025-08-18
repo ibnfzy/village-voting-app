@@ -13,7 +13,7 @@ export default function Register() {
 
   const handleRegisterUser = async () => {
     setError('');
-    
+
     if (!username) {
       setError('Mohon isi username');
       return;
@@ -27,6 +27,8 @@ export default function Register() {
       } else if (result === 'username not available') {
         setError('Username sudah digunakan');
       }
+
+      console.log(result);
     } catch (error) {
       setError('Terjadi kesalahan saat mendaftar');
     } finally {
@@ -74,7 +76,7 @@ export default function Register() {
         </View>
 
         <CustomButton
-          title={loading ? "Memproses..." : "Lanjutkan"}
+          title={loading ? 'Memproses...' : 'Lanjutkan'}
           onPress={handleRegisterUser}
           disabled={loading}
           style={styles.registerButton}
@@ -82,7 +84,7 @@ export default function Register() {
 
         <View style={styles.loginPrompt}>
           <Text style={styles.loginText}>Sudah punya akun? </Text>
-          <Text 
+          <Text
             style={styles.loginLink}
             onPress={() => router.push('/auth/login')}
           >

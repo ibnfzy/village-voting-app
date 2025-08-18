@@ -12,7 +12,9 @@ export default function Home() {
   const { user } = useAuth();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [votingStatus, setVotingStatus] = useState<VotingStatus | null>(null);
-  const [votingResults, setVotingResults] = useState<{ candidate_id: number; vote_count: number; candidate_name: string }[]>([]);
+  const [votingResults, setVotingResults] = useState<
+    { candidate_id: number; vote_count: number; candidate_name: string }[]
+  >([]);
 
   useEffect(() => {
     if (!user) {
@@ -28,9 +30,9 @@ export default function Home() {
     const [candidatesData, statusData, resultsData] = await Promise.all([
       CandidateService.getAllCandidates(),
       VotingService.getVotingStatus(user.pemilih.id_pemilih),
-      VotingService.getVotingResults()
+      VotingService.getVotingResults(),
     ]);
-    
+
     setCandidates(candidatesData);
     setVotingStatus(statusData);
     setVotingResults(resultsData);
@@ -38,19 +40,20 @@ export default function Home() {
 
   if (!user) return null;
 
-  const totalVotes = votingResults.reduce((sum, result) => sum + result.vote_count, 0);
+  const totalVotes = votingResults.reduce(
+    (sum, result) => sum + result.vote_count,
+    0
+  );
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <View style={styles.greeting}>
           <Text style={styles.welcomeText}>Selamat datang,</Text>
-          <Text style={styles.userName}>{user.name}</Text>
+          <Text style={styles.userName}>
+            {user.pemilih?.name ?? user.username}
+          </Text>
         </View>
-        <Image
-          source={{ uri: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1' }}
-          style={styles.userAvatar}
-        />
       </View>
 
       <View style={styles.statusCard}>
@@ -63,13 +66,14 @@ export default function Home() {
         </View>
         <View style={styles.statusContent}>
           <Text style={styles.statusTitle}>
-            {votingStatus?.hasVoted ? 'Suara Anda Sudah Tercatat' : 'Belum Voting'}
+            {votingStatus?.hasVoted
+              ? 'Suara Anda Sudah Tercatat'
+              : 'Belum Voting'}
           </Text>
           <Text style={styles.statusDescription}>
-            {votingStatus?.hasVoted 
+            {votingStatus?.hasVoted
               ? `Terima kasih telah berpartisipasi dalam pemilihan kepala desa`
-              : 'Jangan lupa gunakan hak pilih Anda sebelum masa voting berakhir'
-            }
+              : 'Jangan lupa gunakan hak pilih Anda sebelum masa voting berakhir'}
           </Text>
         </View>
       </View>
@@ -108,23 +112,6 @@ export default function Home() {
               style={styles.actionButton}
             />
           )}
-        </View>
-      </View>
-
-      <View style={styles.newsSection}>
-        <Text style={styles.sectionTitle}>Informasi Terkini</Text>
-        <View style={styles.newsCard}>
-          <Image
-            source={{ uri: 'https://images.pexels.com/photos/6792340/pexels-photo-6792340.jpeg?auto=compress&cs=tinysrgb&w=400' }}
-            style={styles.newsImage}
-          />
-          <View style={styles.newsContent}>
-            <Text style={styles.newsTitle}>Pemilihan Kepala Desa 2024</Text>
-            <Text style={styles.newsDescription}>
-              Masa voting telah dimulai. Pastikan Anda menggunakan hak pilih dengan bijak.
-            </Text>
-            <Text style={styles.newsDate}>15 Januari 2024</Text>
-          </View>
         </View>
       </View>
     </ScrollView>

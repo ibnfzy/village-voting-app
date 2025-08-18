@@ -16,7 +16,9 @@ export default function AuthIndex() {
 
   return (
     <ImageBackground
-      source={{ uri: 'https://images.pexels.com/photos/7713188/pexels-photo-7713188.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' }}
+      source={{
+        uri: 'https://images.pexels.com/photos/3970396/pexels-photo-3970396.jpeg',
+      }}
       style={styles.background}
     >
       <View style={styles.overlay}>
@@ -25,8 +27,10 @@ export default function AuthIndex() {
             <View style={styles.iconContainer}>
               <Vote size={40} color="#FFFFFF" />
             </View>
-            <Text style={styles.title}>PILKADA DESA</Text>
-            <Text style={styles.subtitle}>Sistem Pemilihan Kepala Desa Digital</Text>
+            <Text style={styles.title}>PILKADES</Text>
+            <Text style={styles.subtitle}>
+              Sistem Pemilihan Kepala Desa Digital
+            </Text>
           </View>
 
           <View style={styles.features}>

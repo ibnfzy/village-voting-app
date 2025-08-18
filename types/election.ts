@@ -33,8 +33,8 @@ export interface Candidate {
   id_candidate: number;
   name: string;
   photo: string;
-  visi: string;
-  misi: string;
+  visi: string[]; // array of string
+  misi: string[]; // array of string
 }
 
 export interface Schedule {

@@ -17,13 +17,24 @@ export function CandidateCard({ candidate, onPress }: CandidateCardProps) {
           <Text style={styles.name}>{candidate.name}</Text>
         </View>
       </View>
-      
+
       <View style={styles.visionContainer}>
-        <Text style={styles.visionLabel}>Visi:</Text>
-        <Text style={styles.vision} numberOfLines={3}>
-          {candidate.visi}
+      <Text style={styles.visionLabel}>Visi:</Text>
+      {candidate.visi.map((v, i) => (
+        <Text key={i} style={styles.vision}>
+          • {v}
         </Text>
-      </View>
+      ))}
+    </View>
+
+    <View style={styles.visionContainer}>
+      <Text style={styles.visionLabel}>Misi:</Text>
+      {candidate.misi.map((m, i) => (
+        <Text key={i} style={styles.vision}>
+          • {m}
+        </Text>
+      ))}
+    </View>
 
       <View style={styles.footer}>
         <Text style={styles.viewMore}>Lihat Detail →</Text>

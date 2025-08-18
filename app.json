@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Pilkada Desa",
-    "slug": "village-voting-app",
+    "slug": "pilkada-desa",
     "version": "1.0.0",
     "description": "Sistem Pemilihan Kepala Desa Digital",
     "orientation": "portrait",
@@ -9,10 +9,10 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "owner": "juliiiboi",
+    "owner": "your-expo-username",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.juliiiboi.pilkadadesa"
+      "bundleIdentifier": "com.yourname.pilkadadesa"
     },
     "android": {
       "package": "com.yourname.pilkadadesa",
@@ -28,7 +28,7 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font",
+      "expo-font", 
       "expo-web-browser"
     ],
     "experiments": {
@@ -36,15 +36,8 @@
     },
     "extra": {
       "eas": {
-        "projectId": "7358fe0c-98f1-445b-8cfa-ca6fb2637712"
-      },
-      "router": {}
-    },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/7358fe0c-98f1-445b-8cfa-ca6fb2637712"
+        "projectId": "your-project-id-will-be-generated"
+      }
     }
   }
 }

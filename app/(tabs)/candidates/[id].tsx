@@ -64,12 +64,28 @@ export default function CandidateDetail() {
           <Target size={20} color="#DC2626" />
           <Text style={styles.sectionTitle}>Visi</Text>
         </View>
-        <Text style={styles.visionText}>{candidate.visi}</Text>
+        {Array.isArray(candidate.visi) && candidate.visi.length > 0 ? (
+          candidate.visi.map((item, index) => (
+            <Text key={index} style={styles.visionText}>
+              • {item}
+            </Text>
+          ))
+        ) : (
+          <Text style={styles.visionText}>Tidak ada visi</Text>
+        )}
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Misi</Text>
-        <Text style={styles.missionText}>{candidate.misi}</Text>
+        {Array.isArray(candidate.misi) && candidate.misi.length > 0 ? (
+          candidate.misi.map((item, index) => (
+            <Text key={index} style={styles.missionText}>
+              • {item}
+            </Text>
+          ))
+        ) : (
+          <Text style={styles.missionText}>Tidak ada misi</Text>
+        )}
       </View>
 
       <View style={styles.voteSection}>

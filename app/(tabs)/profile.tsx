@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Alert } from 'react-native';
 import { router } from 'expo-router';
-import { User, Mail, CreditCard, MapPin, CircleCheck as CheckCircle, LogOut, Settings, Award } from 'lucide-react-native';
+import {
+  User,
+  Mail,
+  CreditCard,
+  MapPin,
+  CircleCheck as CheckCircle,
+  LogOut,
+  Settings,
+  Award,
+} from 'lucide-react-native';
 import { CustomButton } from '@/components/CustomButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { VotingService } from '@/services/votingService';
@@ -17,7 +26,7 @@ export default function Profile() {
 
   const loadVotingStatus = async () => {
     if (!user?.pemilih?.id_pemilih) return;
-    
+
     const status = await VotingService.getVotingStatus(user.pemilih.id_pemilih);
     setVotingStatus(status);
   };
@@ -32,21 +41,18 @@ export default function Profile() {
       'Apakah Anda yakin ingin keluar dari akun?',
       [
         { text: 'Batal', style: 'cancel' },
-        { text: 'Keluar', onPress: logout, style: 'destructive' }
+        { text: 'Keluar', onPress: logout, style: 'destructive' },
       ]
     );
   };
 
-
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <Image
-          source={{ uri: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&dpr=1' }}
-          style={styles.avatar}
-        />
         <Text style={styles.name}>{user.pemilih?.name || user.username}</Text>
-        <Text style={styles.email}>{user.pemilih?.email || 'Email tidak tersedia'}</Text>
+        <Text style={styles.email}>
+          {user.pemilih?.email || 'Email tidak tersedia'}
+        </Text>
       </View>
 
       <View style={styles.infoSection}>
@@ -54,7 +60,9 @@ export default function Profile() {
           <User size={20} color="#6B7280" />
           <View style={styles.infoContent}>
             <Text style={styles.infoLabel}>Nama Lengkap</Text>
-            <Text style={styles.infoValue}>{user.pemilih?.name || 'Tidak tersedia'}</Text>
+            <Text style={styles.infoValue}>
+              {user.pemilih?.name || 'Tidak tersedia'}
+            </Text>
           </View>
         </View>
 
@@ -62,7 +70,9 @@ export default function Profile() {
           <CreditCard size={20} color="#6B7280" />
           <View style={styles.infoContent}>
             <Text style={styles.infoLabel}>NIK</Text>
-            <Text style={styles.infoValue}>{user.pemilih?.nik || 'Tidak tersedia'}</Text>
+            <Text style={styles.infoValue}>
+              {user.pemilih?.nik || 'Tidak tersedia'}
+            </Text>
           </View>
         </View>
 
@@ -70,7 +80,9 @@ export default function Profile() {
           <Mail size={20} color="#6B7280" />
           <View style={styles.infoContent}>
             <Text style={styles.infoLabel}>Email</Text>
-            <Text style={styles.infoValue}>{user.pemilih?.email || 'Tidak tersedia'}</Text>
+            <Text style={styles.infoValue}>
+              {user.pemilih?.email || 'Tidak tersedia'}
+            </Text>
           </View>
         </View>
 
@@ -79,10 +91,9 @@ export default function Profile() {
           <View style={styles.infoContent}>
             <Text style={styles.infoLabel}>Alamat</Text>
             <Text style={styles.infoValue}>
-              {user.pemilih?.alamat ? 
-                `${user.pemilih.alamat}, RT ${user.pemilih.rt}/RW ${user.pemilih.rw}, ${user.pemilih.kelurahan}, ${user.pemilih.kecamatan}` 
-                : 'Tidak tersedia'
-              }
+              {user.pemilih?.alamat
+                ? `${user.pemilih.alamat}, RT ${user.pemilih.rt}/RW ${user.pemilih.rw}, ${user.pemilih.kelurahan}, ${user.pemilih.kecamatan}`
+                : 'Tidak tersedia'}
             </Text>
           </View>
         </View>
@@ -97,7 +108,7 @@ export default function Profile() {
             <View style={styles.pendingIcon} />
           )}
         </View>
-        
+
         {votingStatus?.hasVoted ? (
           <View style={styles.votedInfo}>
             <Text style={styles.statusText}>✅ Sudah voting</Text>
@@ -109,10 +120,9 @@ export default function Profile() {
           <View style={styles.notVotedInfo}>
             <Text style={styles.statusText}>⏳ Belum voting</Text>
             <Text style={styles.statusDescription}>
-              {votingStatus?.canVote 
+              {votingStatus?.canVote
                 ? 'Jangan lupa gunakan hak pilih Anda'
-                : (votingStatus?.message || 'Masa voting belum dimulai')
-              }
+                : votingStatus?.message || 'Masa voting belum dimulai'}
             </Text>
             {votingStatus?.canVote && (
               <CustomButton
@@ -127,15 +137,17 @@ export default function Profile() {
 
       <View style={styles.actionsSection}>
         <Text style={styles.sectionTitle}>Pengaturan</Text>
-        
+
         <View style={styles.actionButtons}>
           <CustomButton
             title="Edit Profil"
-            onPress={() => Alert.alert('Info', 'Fitur edit profil akan segera tersedia')}
+            onPress={() =>
+              Alert.alert('Info', 'Fitur edit profil akan segera tersedia')
+            }
             variant="secondary"
             style={styles.actionButton}
           />
-          
+
           <CustomButton
             title="Keluar"
             onPress={handleLogout}
@@ -146,12 +158,8 @@ export default function Profile() {
       </View>
 
       <View style={styles.appInfo}>
-        <Text style={styles.appInfoText}>
-          Aplikasi Pilkada Desa v1.0.0
-        </Text>
-        <Text style={styles.appInfoText}>
-          © 2024 Sistem Pemilihan Digital
-        </Text>
+        <Text style={styles.appInfoText}>Aplikasi Pilkada Desa v1.0.0</Text>
+        <Text style={styles.appInfoText}>© 2024 Sistem Pemilihan Digital</Text>
       </View>
     </ScrollView>
   );
