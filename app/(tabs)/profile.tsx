@@ -7,9 +7,6 @@ import {
   CreditCard,
   MapPin,
   CircleCheck as CheckCircle,
-  LogOut,
-  Settings,
-  Award,
 } from 'lucide-react-native';
 import { CustomButton } from '@/components/CustomButton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -139,15 +136,6 @@ export default function Profile() {
         <Text style={styles.sectionTitle}>Pengaturan</Text>
 
         <View style={styles.actionButtons}>
-          <CustomButton
-            title="Edit Profil"
-            onPress={() =>
-              Alert.alert('Info', 'Fitur edit profil akan segera tersedia')
-            }
-            variant="secondary"
-            style={styles.actionButton}
-          />
-
           <CustomButton
             title="Keluar"
             onPress={handleLogout}

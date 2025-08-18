@@ -112,7 +112,6 @@ export default function Vote() {
   };
 
   const handleVote = () => {
-    console.log('Tombol Konfirmasi Ditekan');
     if (!selectedCandidate) {
       Alert.alert(
         'Peringatan',
