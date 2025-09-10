@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Alert } from 'react-native';
 import { router } from 'expo-router';
 import {
@@ -12,6 +12,7 @@ import { CustomButton } from '@/components/CustomButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { VotingService } from '@/services/votingService';
 import { VotingStatus } from '@/types/election';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function Profile() {
   const { user, logout } = useAuth();
@@ -20,6 +21,12 @@ export default function Profile() {
   useEffect(() => {
     loadVotingStatus();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadVotingStatus(); // panggil API lagi setiap kali index aktif
+    }, [])
+  );
 
   const loadVotingStatus = async () => {
     if (!user?.pemilih?.id_pemilih) return;

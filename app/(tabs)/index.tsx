@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import { router } from 'expo-router';
 import { Clock, Users, TrendingUp, Calendar, Vote } from 'lucide-react-native';
@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { CandidateService } from '@/services/candidateService';
 import { VotingService } from '@/services/votingService';
 import { Candidate, VotingStatus } from '@/types/election';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function Home() {
   const { user } = useAuth();
@@ -24,6 +25,12 @@ export default function Home() {
     }
   }, [user]);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadData(); // panggil API lagi setiap kali index aktif
+    }, [])
+  );
+
   const loadData = async () => {
     if (!user?.pemilih?.id_pemilih) return;
 
@@ -36,12 +43,14 @@ export default function Home() {
     setCandidates(candidatesData);
     setVotingStatus(statusData);
     setVotingResults(resultsData);
+
+    console.log(votingStatus?.hasVoted);
   };
 
   if (!user) return null;
 
   const totalVotes = votingResults.reduce(
-    (sum, result) => sum + result.vote_count,
+    (sum, result) => sum + Number(result.vote_count),
     0
   );
 
@@ -65,16 +74,34 @@ export default function Home() {
           )}
         </View>
         <View style={styles.statusContent}>
-          <Text style={styles.statusTitle}>
-            {votingStatus?.hasVoted
-              ? 'Suara Anda Sudah Tercatat'
-              : 'Belum Voting'}
-          </Text>
-          <Text style={styles.statusDescription}>
-            {votingStatus?.hasVoted
-              ? `Terima kasih telah berpartisipasi dalam pemilihan kepala desa`
-              : 'Jangan lupa gunakan hak pilih Anda sebelum masa voting berakhir'}
-          </Text>
+          {votingStatus?.hasVoted ? (
+            <>
+              <Text style={styles.statusTitle}>Suara Anda Sudah Tercatat</Text>
+              <Text style={styles.statusDescription}>
+                Terima kasih telah berpartisipasi dalam pemilihan kepala desa
+              </Text>
+            </>
+          ) : !votingStatus?.canVote ? (
+            <>
+              <Text style={styles.statusTitle}>Sesi Voting Telah Berakhir</Text>
+              <Text style={styles.statusDescription}>
+                Masa pemungutan suara sudah selesai pada{' '}
+                {new Date(
+                  votingStatus?.schedule?.end_time ?? ''
+                ).toLocaleString('id-ID', {
+                  dateStyle: 'full',
+                  timeStyle: 'short',
+                })}
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.statusTitle}>Belum Voting</Text>
+              <Text style={styles.statusDescription}>
+                Jangan lupa gunakan hak pilih Anda sebelum masa voting berakhir
+              </Text>
+            </>
+          )}
         </View>
       </View>
 

@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  ScrollView,
+  Alert,
+} from 'react-native';
 import { router } from 'expo-router';
 import { User, Mail, Lock, ArrowLeft } from 'lucide-react-native';
 import { CustomButton } from '@/components/CustomButton';
@@ -7,25 +14,24 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function Login() {
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
   const handleLogin = async () => {
-    if (!username || !password) {
+    if (!username) {
       Alert.alert('Error', 'Mohon isi semua field');
       return;
     }
 
     setLoading(true);
     try {
-      const result = await login(username, password);
+      const result = await login(username);
       if (result === 'success') {
         router.replace('/(tabs)');
       } else if (result === 'user not found') {
         Alert.alert('Error', 'Pengguna tidak ditemukan');
-      } else if (result === 'password wrong') {
-        Alert.alert('Error', 'Password salah');
+      } else if (result === 'invalid account') {
+        Alert.alert('Error', 'Akun mu belum divalidasi Panitia');
       }
     } catch (error) {
       Alert.alert('Error', 'Terjadi kesalahan saat login');
@@ -45,7 +51,9 @@ export default function Login() {
           textStyle={styles.backButtonText}
         />
         <Text style={styles.title}>Masuk</Text>
-        <Text style={styles.subtitle}>Masuk ke akun Anda untuk mulai voting</Text>
+        <Text style={styles.subtitle}>
+          Masuk ke akun Anda untuk mulai voting
+        </Text>
       </View>
 
       <View style={styles.form}>
@@ -61,20 +69,8 @@ export default function Login() {
           />
         </View>
 
-        <View style={styles.inputContainer}>
-          <Lock size={20} color="#6B7280" style={styles.inputIcon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor="#9CA3AF"
-          />
-        </View>
-
         <CustomButton
-          title={loading ? "Masuk..." : "Masuk"}
+          title={loading ? 'Masuk...' : 'Masuk'}
           onPress={handleLogin}
           disabled={loading}
           style={styles.loginButton}
@@ -82,7 +78,7 @@ export default function Login() {
 
         <View style={styles.registerPrompt}>
           <Text style={styles.registerText}>Belum punya akun? </Text>
-          <Text 
+          <Text
             style={styles.registerLink}
             onPress={() => router.push('/auth/register')}
           >

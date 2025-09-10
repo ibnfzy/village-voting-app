@@ -154,6 +154,12 @@ export default function Vote() {
       );
 
       if (result === 'success') {
+        setVotingStatus((prev) => ({
+          ...(prev as VotingStatus),
+          hasVoted: true,
+          canVote: false,
+        }));
+
         Alert.alert(
           'Voting Berhasil',
           'Terima kasih telah menggunakan hak pilih Anda!',
@@ -250,15 +256,16 @@ export default function Vote() {
               )}
               <Text style={styles.scheduleTitle}>Jadwal Voting</Text>
             </View>
+
             <View style={styles.scheduleContent}>
               {isVotingDay ? (
                 <>
                   <Text style={styles.scheduleLabel}>
                     Voting sedang berlangsung!
                   </Text>
-                  {countdown && (
-                    <View style={styles.countdownContainer}>
-                      <Text style={styles.countdownLabel}>Sisa waktu:</Text>
+                  <View style={styles.countdownContainer}>
+                    <Text style={styles.countdownLabel}>Sisa waktu:</Text>
+                    {countdown ? (
                       <View style={styles.countdownGrid}>
                         <View style={styles.countdownItem}>
                           <Text style={styles.countdownNumber}>
@@ -285,16 +292,20 @@ export default function Vote() {
                           <Text style={styles.countdownUnit}>Detik</Text>
                         </View>
                       </View>
-                    </View>
-                  )}
+                    ) : (
+                      <Text style={{ textAlign: 'center' }}>
+                        Menghitung waktu...
+                      </Text>
+                    )}
+                  </View>
                 </>
               ) : (
                 <>
-                  {countdown && countdown.days > 0 ? (
-                    <View style={styles.countdownContainer}>
-                      <Text style={styles.countdownLabel}>
-                        Voting dimulai dalam:
-                      </Text>
+                  <Text style={styles.scheduleLabel}>
+                    Voting dimulai dalam:
+                  </Text>
+                  <View style={styles.countdownContainer}>
+                    {countdown ? (
                       <View style={styles.countdownGrid}>
                         <View style={styles.countdownItem}>
                           <Text style={styles.countdownNumber}>
@@ -321,21 +332,22 @@ export default function Vote() {
                           <Text style={styles.countdownUnit}>Detik</Text>
                         </View>
                       </View>
-                    </View>
-                  ) : (
-                    <>
-                      <Text style={styles.scheduleLabel}>Mulai:</Text>
-                      <Text style={styles.scheduleTime}>
-                        {formatDateTime(votingStatus.schedule.start_time)}
-                      </Text>
-                      <Text style={styles.scheduleLabel}>Berakhir:</Text>
-                      <Text style={styles.scheduleTime}>
-                        {formatDateTime(votingStatus.schedule.end_time)}
-                      </Text>
-                    </>
-                  )}
+                    ) : (
+                      <>
+                        <Text style={styles.scheduleTime}>
+                          Mulai:{' '}
+                          {formatDateTime(votingStatus.schedule.start_time)}
+                        </Text>
+                        <Text style={styles.scheduleTime}>
+                          Berakhir:{' '}
+                          {formatDateTime(votingStatus.schedule.end_time)}
+                        </Text>
+                      </>
+                    )}
+                  </View>
                 </>
               )}
+
               {votingStatus.schedule.description && (
                 <>
                   <Text style={styles.scheduleLabel}>Keterangan:</Text>
@@ -389,6 +401,38 @@ export default function Vote() {
                   votingStatus.schedule.start_time
                 )}`}
           </Text>
+        </View>
+      )}
+
+      {votingStatus?.schedule && (
+        <View style={{ marginBottom: 16 }}>
+          {isVotingDay ? (
+            <Text style={styles.scheduleLabel}>Sisa waktu voting:</Text>
+          ) : (
+            <Text style={styles.scheduleLabel}>Voting dimulai dalam:</Text>
+          )}
+          {countdown ? (
+            <View style={styles.countdownGrid}>
+              <View style={styles.countdownItem}>
+                <Text style={styles.countdownNumber}>{countdown.days}</Text>
+                <Text style={styles.countdownUnit}>Hari</Text>
+              </View>
+              <View style={styles.countdownItem}>
+                <Text style={styles.countdownNumber}>{countdown.hours}</Text>
+                <Text style={styles.countdownUnit}>Jam</Text>
+              </View>
+              <View style={styles.countdownItem}>
+                <Text style={styles.countdownNumber}>{countdown.minutes}</Text>
+                <Text style={styles.countdownUnit}>Menit</Text>
+              </View>
+              <View style={styles.countdownItem}>
+                <Text style={styles.countdownNumber}>{countdown.seconds}</Text>
+                <Text style={styles.countdownUnit}>Detik</Text>
+              </View>
+            </View>
+          ) : (
+            <Text style={{ textAlign: 'center' }}>Menghitung waktu...</Text>
+          )}
         </View>
       )}
 

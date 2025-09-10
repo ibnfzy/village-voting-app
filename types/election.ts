@@ -23,7 +23,7 @@ export interface PemilihDetails {
   kabupaten?: string;
   provinsi?: string;
   email: string;
-  access_code?: string;
+  validate?: number;
   registered_at?: string;
   hasVoted: boolean;
   votedFor?: string;

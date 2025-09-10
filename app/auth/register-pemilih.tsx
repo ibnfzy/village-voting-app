@@ -1,7 +1,21 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  ScrollView,
+  Alert,
+} from 'react-native';
 import { router } from 'expo-router';
-import { User, Mail, CreditCard, MapPin, Calendar, Users } from 'lucide-react-native';
+import {
+  User,
+  Mail,
+  CreditCard,
+  MapPin,
+  Calendar,
+  Users,
+} from 'lucide-react-native';
 import { CustomButton } from '@/components/CustomButton';
 import { useAuth, PemilihRegistrationData } from '@/contexts/AuthContext';
 
@@ -17,13 +31,14 @@ export default function RegisterPemilih() {
     rt: '',
     rw: '',
     kelurahan: '',
-    kecamatan: '',
-    kabupaten: '',
-    provinsi: '',
+    kecamatan: 'Balantak Utara',
+    kabupaten: 'Banggai',
+    provinsi: 'Sulawesi Tengah',
     email: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   React.useEffect(() => {
     if (!tempUserId) {
@@ -32,12 +47,12 @@ export default function RegisterPemilih() {
   }, [tempUserId]);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleRegisterPemilih = async () => {
     setError('');
-    
+
     // Validate required fields
     if (!formData.nik || !formData.name || !formData.email) {
       setError('NIK, Nama, dan Email wajib diisi');
@@ -46,6 +61,29 @@ export default function RegisterPemilih() {
 
     if (formData.nik.length !== 16) {
       setError('NIK harus 16 digit');
+      return;
+    }
+
+    // Validasi umur minimal 17 tahun
+    if (!formData.tanggal_lahir) {
+      setError('Tanggal lahir wajib diisi');
+      return;
+    }
+    const birthDate = new Date(formData.tanggal_lahir);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    // Jika bulan belum lewat atau masih bulan yang sama tapi tanggal belum lewat → umur dikurangi 1
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    if (age < 17) {
+      setError('Minimal usia untuk registrasi adalah 17 tahun');
       return;
     }
 
@@ -65,11 +103,9 @@ export default function RegisterPemilih() {
 
       const result = await registerPemilih(pemilihData);
       if (result === 'registration successful') {
-        Alert.alert(
-          'Registrasi Berhasil',
-          'Akun Anda telah berhasil dibuat!',
-          [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
-        );
+        Alert.alert('Registrasi Berhasil', 'Akun Anda telah berhasil dibuat!', [
+          { text: 'OK', onPress: () => router.replace('/') },
+        ]);
       } else if (result === 'email not available') {
         setError('Email sudah digunakan');
       } else if (result === 'nik not available') {
@@ -102,7 +138,8 @@ export default function RegisterPemilih() {
 
       <View style={styles.infoBox}>
         <Text style={styles.infoText}>
-          Setelah registrasi selesai, Anda akan menerima password dari panitia pemilihan untuk dapat login dan voting
+          Setelah registrasi selesai, Anda akan menerima password dari panitia
+          pemilihan untuk dapat login dan voting
         </Text>
       </View>
 
@@ -114,7 +151,7 @@ export default function RegisterPemilih() {
 
       <View style={styles.form}>
         <Text style={styles.sectionTitle}>Data Pribadi</Text>
-        
+
         <View style={styles.inputContainer}>
           <CreditCard size={20} color="#6B7280" style={styles.inputIcon} />
           <TextInput
@@ -167,7 +204,9 @@ export default function RegisterPemilih() {
             style={styles.input}
             placeholder="Jenis Kelamin (L/P)"
             value={formData.jenis_kelamin}
-            onChangeText={(value) => handleInputChange('jenis_kelamin', value.toUpperCase())}
+            onChangeText={(value) =>
+              handleInputChange('jenis_kelamin', value.toUpperCase())
+            }
             maxLength={1}
             placeholderTextColor="#9CA3AF"
           />
@@ -224,9 +263,8 @@ export default function RegisterPemilih() {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Kecamatan"
-            value={formData.kecamatan}
-            onChangeText={(value) => handleInputChange('kecamatan', value)}
+            value="Balantak Utara"
+            editable={false} // bikin readonly
             placeholderTextColor="#9CA3AF"
           />
         </View>
@@ -234,9 +272,8 @@ export default function RegisterPemilih() {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Kabupaten/Kota"
-            value={formData.kabupaten}
-            onChangeText={(value) => handleInputChange('kabupaten', value)}
+            value="Banggai"
+            editable={false}
             placeholderTextColor="#9CA3AF"
           />
         </View>
@@ -244,9 +281,8 @@ export default function RegisterPemilih() {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Provinsi"
-            value={formData.provinsi}
-            onChangeText={(value) => handleInputChange('provinsi', value)}
+            value="Sulawesi Tengah"
+            editable={false}
             placeholderTextColor="#9CA3AF"
           />
         </View>
@@ -267,7 +303,7 @@ export default function RegisterPemilih() {
         </View>
 
         <CustomButton
-          title={loading ? "Mendaftar..." : "Selesaikan Registrasi"}
+          title={loading ? 'Mendaftar...' : 'Selesaikan Registrasi'}
           onPress={handleRegisterPemilih}
           disabled={loading}
           style={styles.registerButton}

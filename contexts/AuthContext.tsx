@@ -4,9 +4,17 @@ import { buildApiUrl, API_CONFIG } from '@/config/api';
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string, password: string) => Promise<'success' | 'user not found' | 'password wrong'>;
-  registerUser: (username: string) => Promise<'user created' | 'username not available'>;
-  registerPemilih: (pemilihData: PemilihRegistrationData) => Promise<'registration successful' | 'email not available' | 'nik not available'>;
+  login: (
+    username: string
+  ) => Promise<'success' | 'user not found' | 'invalid account'>;
+  registerUser: (
+    username: string
+  ) => Promise<'user created' | 'username not available'>;
+  registerPemilih: (
+    pemilihData: PemilihRegistrationData
+  ) => Promise<
+    'registration successful' | 'email not available' | 'nik not available'
+  >;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
   tempUserId: number | null;
@@ -35,14 +43,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [tempUserId, setTempUserId] = useState<number | null>(null);
 
-  const login = async (username: string, password: string): Promise<'success' | 'user not found' | 'password wrong'> => {
+  const login = async (
+    username: string
+  ): Promise<'success' | 'user not found' | 'invalid account'> => {
     try {
       const response = await fetch(buildApiUrl(API_CONFIG.ROUTES.AUTH.LOGIN), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username }),
       });
 
       const data = await response.json();
@@ -50,10 +60,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.status === 'success') {
         setUser(data.user);
         return 'success';
-      } else if (data.status === 'user not found') {
+      } else if (data.status === 'error' && data.message === 'user not found') {
         return 'user not found';
-      } else if (data.status === 'password wrong') {
-        return 'password wrong';
+      } else if (
+        data.status === 'error' &&
+        data.message === 'invalid account'
+      ) {
+        return 'invalid account';
       }
 
       // Fallback for unexpected responses
@@ -64,15 +77,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const registerUser = async (username: string): Promise<'user created' | 'username not available'> => {
+  const registerUser = async (
+    username: string
+  ): Promise<'user created' | 'username not available'> => {
     try {
-      const response = await fetch(buildApiUrl(API_CONFIG.ROUTES.AUTH.REGISTER_USER), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username }),
-      });
+      const response = await fetch(
+        buildApiUrl(API_CONFIG.ROUTES.AUTH.REGISTER_USER),
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username }),
+        }
+      );
 
       const data = await response.json();
 
@@ -91,20 +109,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const registerPemilih = async (pemilihData: PemilihRegistrationData): Promise<'registration successful' | 'email not available' | 'nik not available'> => {
+  const registerPemilih = async (
+    pemilihData: PemilihRegistrationData
+  ): Promise<
+    'registration successful' | 'email not available' | 'nik not available'
+  > => {
     try {
-      const response = await fetch(buildApiUrl(API_CONFIG.ROUTES.AUTH.REGISTER_PEMILIH), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(pemilihData),
-      });
+      const response = await fetch(
+        buildApiUrl(API_CONFIG.ROUTES.AUTH.REGISTER_PEMILIH),
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(pemilihData),
+        }
+      );
 
       const data = await response.json();
 
       if (data.status === 'registration successful') {
-        setUser(data.user);
+        // setUser(data.user);
         setTempUserId(null);
         return 'registration successful';
       } else if (data.status === 'email not available') {
@@ -133,7 +158,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, registerUser, registerPemilih, logout, updateUser, tempUserId }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        registerUser,
+        registerPemilih,
+        logout,
+        updateUser,
+        tempUserId,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
