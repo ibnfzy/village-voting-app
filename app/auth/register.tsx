@@ -27,8 +27,6 @@ export default function Register() {
       } else if (result === 'username not available') {
         setError('Username sudah digunakan');
       }
-
-      console.log(result);
     } catch (error) {
       setError('Terjadi kesalahan saat mendaftar');
     } finally {

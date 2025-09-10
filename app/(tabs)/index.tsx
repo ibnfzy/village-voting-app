@@ -43,8 +43,6 @@ export default function Home() {
     setCandidates(candidatesData);
     setVotingStatus(statusData);
     setVotingResults(resultsData);
-
-    console.log(votingStatus?.hasVoted);
   };
 
   if (!user) return null;
