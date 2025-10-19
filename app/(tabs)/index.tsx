@@ -114,11 +114,6 @@ export default function Home() {
           <Text style={styles.statNumber}>{totalVotes}</Text>
           <Text style={styles.statLabel}>Total Suara</Text>
         </View>
-        <View style={styles.statCard}>
-          <Calendar size={20} color="#DC2626" />
-          <Text style={styles.statNumber}>3</Text>
-          <Text style={styles.statLabel}>Hari Tersisa</Text>
-        </View>
       </View>
 
       <View style={styles.quickActions}>
