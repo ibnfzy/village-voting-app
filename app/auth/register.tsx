@@ -67,12 +67,6 @@ export default function Register() {
           />
         </View>
 
-        <View style={styles.infoBox}>
-          <Text style={styles.infoText}>
-            Password akan diberikan oleh panitia pemilihan saat hari voting
-          </Text>
-        </View>
-
         <CustomButton
           title={loading ? 'Memproses...' : 'Lanjutkan'}
           onPress={handleRegisterUser}
