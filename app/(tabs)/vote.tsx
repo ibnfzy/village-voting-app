@@ -603,6 +603,7 @@ export default function Vote() {
                 onPress={() =>
                   setSelectedCandidate(candidate.id_candidate.toString())
                 }
+                variant="compact"
               />
             </View>
           </View>
