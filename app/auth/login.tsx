@@ -18,20 +18,24 @@ export default function Login() {
   const { login } = useAuth();
 
   const handleLogin = async () => {
-    if (!nik) {
+    const trimmedNik = nik.trim();
+
+    if (!trimmedNik) {
       Alert.alert('Error', 'Mohon isi NIK Anda');
       return;
     }
 
     setLoading(true);
     try {
-      const result = await login(nik);
+      const result = await login(trimmedNik);
       if (result === 'success') {
         router.replace('/(tabs)');
       } else if (result === 'user not found') {
         Alert.alert('Error', 'Pengguna tidak ditemukan');
       } else if (result === 'nik not found') {
         Alert.alert('Error', 'NIK tidak ditemukan');
+      } else if (result === 'pemilih not found') {
+        Alert.alert('Error', 'Data pemilih tidak ditemukan.');
       } else if (result === 'invalid account') {
         Alert.alert('Error', 'Akun mu belum divalidasi Panitia');
       }

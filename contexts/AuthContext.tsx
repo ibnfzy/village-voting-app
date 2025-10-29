@@ -6,7 +6,13 @@ interface AuthContextType {
   user: User | null;
   login: (
     nik: string
-  ) => Promise<'success' | 'user not found' | 'invalid account' | 'nik not found'>;
+  ) => Promise<
+    | 'success'
+    | 'user not found'
+    | 'invalid account'
+    | 'nik not found'
+    | 'pemilih not found'
+  >;
   registerUser: (
     username: string
   ) => Promise<'user created' | 'username not available'>;
@@ -45,7 +51,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (
     nik: string
-  ): Promise<'success' | 'user not found' | 'invalid account' | 'nik not found'> => {
+  ): Promise<
+    | 'success'
+    | 'user not found'
+    | 'invalid account'
+    | 'nik not found'
+    | 'pemilih not found'
+  > => {
     try {
       const response = await fetch(buildApiUrl(API_CONFIG.ROUTES.AUTH.LOGIN), {
         method: 'POST',
@@ -56,6 +68,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       const data = await response.json();
+
+      if (
+        response.status === 404 &&
+        data?.message === 'Data pemilih tidak ditemukan.'
+      ) {
+        return 'pemilih not found';
+      }
 
       if (data.status === 'success') {
         setUser(data.user);
