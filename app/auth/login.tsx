@@ -8,28 +8,30 @@ import {
   Alert,
 } from 'react-native';
 import { router } from 'expo-router';
-import { User, Mail, Lock, ArrowLeft } from 'lucide-react-native';
+import { IdCard } from 'lucide-react-native';
 import { CustomButton } from '@/components/CustomButton';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
+  const [nik, setNik] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
   const handleLogin = async () => {
-    if (!username) {
-      Alert.alert('Error', 'Mohon isi semua field');
+    if (!nik) {
+      Alert.alert('Error', 'Mohon isi NIK Anda');
       return;
     }
 
     setLoading(true);
     try {
-      const result = await login(username);
+      const result = await login(nik);
       if (result === 'success') {
         router.replace('/(tabs)');
       } else if (result === 'user not found') {
         Alert.alert('Error', 'Pengguna tidak ditemukan');
+      } else if (result === 'nik not found') {
+        Alert.alert('Error', 'NIK tidak ditemukan');
       } else if (result === 'invalid account') {
         Alert.alert('Error', 'Akun mu belum divalidasi Panitia');
       }
@@ -58,12 +60,12 @@ export default function Login() {
 
       <View style={styles.form}>
         <View style={styles.inputContainer}>
-          <User size={20} color="#6B7280" style={styles.inputIcon} />
+          <IdCard size={20} color="#6B7280" style={styles.inputIcon} />
           <TextInput
             style={styles.input}
-            placeholder="Username"
-            value={username}
-            onChangeText={setUsername}
+            placeholder="NIK"
+            value={nik}
+            onChangeText={setNik}
             autoCapitalize="none"
             placeholderTextColor="#9CA3AF"
           />
