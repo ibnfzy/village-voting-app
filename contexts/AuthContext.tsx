@@ -5,8 +5,14 @@ import { buildApiUrl, API_CONFIG } from '@/config/api';
 interface AuthContextType {
   user: User | null;
   login: (
-    username: string
-  ) => Promise<'success' | 'user not found' | 'invalid account'>;
+    nik: string
+  ) => Promise<
+    | 'success'
+    | 'user not found'
+    | 'invalid account'
+    | 'nik not found'
+    | 'pemilih not found'
+  >;
   registerUser: (
     username: string
   ) => Promise<'user created' | 'username not available'>;
@@ -44,24 +50,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [tempUserId, setTempUserId] = useState<number | null>(null);
 
   const login = async (
-    username: string
-  ): Promise<'success' | 'user not found' | 'invalid account'> => {
+    nik: string
+  ): Promise<
+    | 'success'
+    | 'user not found'
+    | 'invalid account'
+    | 'nik not found'
+    | 'pemilih not found'
+  > => {
     try {
       const response = await fetch(buildApiUrl(API_CONFIG.ROUTES.AUTH.LOGIN), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username }),
+        body: JSON.stringify({ nik }),
       });
 
       const data = await response.json();
+
+      if (
+        response.status === 404 &&
+        data?.message === 'Data pemilih tidak ditemukan.'
+      ) {
+        return 'pemilih not found';
+      }
 
       if (data.status === 'success') {
         setUser(data.user);
         return 'success';
       } else if (data.status === 'error' && data.message === 'user not found') {
         return 'user not found';
+      } else if (data.status === 'error' && data.message === 'nik not found') {
+        return 'nik not found';
       } else if (
         data.status === 'error' &&
         data.message === 'invalid account'
