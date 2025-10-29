@@ -58,3 +58,11 @@ export interface VotingStatus {
   schedule?: Schedule;
   message: string;
 }
+
+export interface VotingWinner {
+  candidate_id: number;
+  candidate_name: string;
+  vote_count: number;
+  percentage?: number;
+  photo?: string;
+}

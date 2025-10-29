@@ -25,6 +25,7 @@ export const API_CONFIG = {
       RESULTS: '/vote/results',
       STATUS: '/vote/status',
       SCHEDULE: '/vote/schedule',
+      WINNER: '/vote/winner',
     },
   },
 };

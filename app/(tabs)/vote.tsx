@@ -8,13 +8,14 @@ import {
   Clock,
   Calendar,
   Timer,
+  Trophy,
 } from 'lucide-react-native';
 import { CandidateCard } from '@/components/CandidateCard';
 import { CustomButton } from '@/components/CustomButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { CandidateService } from '@/services/candidateService';
 import { VotingService } from '@/services/votingService';
-import { Candidate, VotingStatus } from '@/types/election';
+import { Candidate, VotingStatus, VotingWinner } from '@/types/election';
 
 export default function Vote() {
   const { user } = useAuth();
@@ -32,6 +33,10 @@ export default function Vote() {
     seconds: number;
   } | null>(null);
   const [isVotingDay, setIsVotingDay] = useState(false);
+  const [isVotingFinished, setIsVotingFinished] = useState(false);
+  const [votingWinner, setVotingWinner] = useState<VotingWinner | null>(null);
+  const [winnerLoading, setWinnerLoading] = useState(false);
+  const [winnerError, setWinnerError] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -47,8 +52,60 @@ export default function Vote() {
     }
   }, [votingStatus]);
 
+  useEffect(() => {
+    if (votingStatus?.schedule) {
+      updateCountdown();
+    }
+  }, [votingStatus?.schedule]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadWinnerData = async () => {
+      setWinnerLoading(true);
+      setWinnerError(null);
+
+      try {
+        const winnerData = await VotingService.getVotingWinner();
+
+        if (!isMounted) return;
+
+        if (winnerData && winnerData.candidate_name) {
+          setVotingWinner(winnerData);
+        } else {
+          setVotingWinner(null);
+          setWinnerError('Data pemenang belum tersedia.');
+        }
+      } catch (error) {
+        if (!isMounted) return;
+        setWinnerError('Gagal memuat data pemenang.');
+        setVotingWinner(null);
+      } finally {
+        if (!isMounted) return;
+        setWinnerLoading(false);
+      }
+    };
+
+    if (isVotingFinished) {
+      loadWinnerData();
+    } else {
+      setWinnerLoading(false);
+      setWinnerError(null);
+      setVotingWinner(null);
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isVotingFinished]);
+
   const updateCountdown = () => {
-    if (!votingStatus?.schedule) return;
+    if (!votingStatus?.schedule) {
+      setIsVotingDay(false);
+      setIsVotingFinished(false);
+      setCountdown(null);
+      return;
+    }
 
     const now = new Date().getTime();
     const startTime = new Date(votingStatus.schedule.start_time).getTime();
@@ -57,6 +114,7 @@ export default function Vote() {
     // Check if it's voting day (between start and end time)
     if (now >= startTime && now <= endTime) {
       setIsVotingDay(true);
+      setIsVotingFinished(false);
       // Calculate countdown to end time
       const timeLeft = endTime - now;
 
@@ -74,6 +132,7 @@ export default function Vote() {
       }
     } else if (now < startTime) {
       setIsVotingDay(false);
+      setIsVotingFinished(false);
       // Calculate countdown to start time
       const timeLeft = startTime - now;
 
@@ -92,6 +151,7 @@ export default function Vote() {
     } else {
       setIsVotingDay(false);
       setCountdown(null);
+      setIsVotingFinished(true);
     }
   };
 
@@ -108,6 +168,19 @@ export default function Vote() {
 
     setCandidates(candidatesData);
     setVotingStatus(statusData);
+    const schedule = statusData?.schedule;
+    const hasFinished = schedule
+      ? new Date(schedule.end_time).getTime() <= new Date().getTime()
+      : !statusData?.canVote &&
+        Boolean(
+          statusData?.message &&
+            statusData.message.toLowerCase().includes('berakhir')
+        );
+    setIsVotingFinished(hasFinished);
+    if (!hasFinished) {
+      setVotingWinner(null);
+      setWinnerError(null);
+    }
     setStatusLoading(false);
   };
 
@@ -199,6 +272,42 @@ export default function Vote() {
     });
   };
 
+  const renderWinnerSection = () => {
+    if (!isVotingFinished) return null;
+
+    return (
+      <View style={styles.winnerCard}>
+        <View style={styles.winnerHeader}>
+          <Trophy size={24} color="#DC2626" />
+          <Text style={styles.winnerTitle}>Pemenang Pemilihan</Text>
+        </View>
+        {winnerLoading ? (
+          <Text style={styles.winnerLoadingText}>Memuat data pemenang...</Text>
+        ) : winnerError ? (
+          <Text style={styles.winnerErrorText}>{winnerError}</Text>
+        ) : votingWinner ? (
+          <>
+            <Text style={styles.winnerName}>{votingWinner.candidate_name}</Text>
+            {typeof votingWinner.vote_count === 'number' && (
+              <Text style={styles.winnerStats}>
+                Total suara: {votingWinner.vote_count.toLocaleString('id-ID')}
+              </Text>
+            )}
+            {typeof votingWinner.percentage === 'number' && (
+              <Text style={styles.winnerStats}>
+                Persentase suara: {votingWinner.percentage.toFixed(2)}%
+              </Text>
+            )}
+          </>
+        ) : (
+          <Text style={styles.winnerLoadingText}>
+            Data pemenang belum tersedia.
+          </Text>
+        )}
+      </View>
+    );
+  };
+
   if (statusLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -215,9 +324,17 @@ export default function Vote() {
       >
         <View style={styles.header}>
           <CheckCircle size={48} color="#10B981" />
-          <Text style={styles.title}>Voting Selesai</Text>
-          <Text style={styles.subtitle}>Anda telah memberikan suara</Text>
+          <Text style={styles.title}>
+            {isVotingFinished ? 'Voting Telah Selesai' : 'Voting Selesai'}
+          </Text>
+          <Text style={styles.subtitle}>
+            {isVotingFinished
+              ? 'Terima kasih telah berpartisipasi dalam pemilihan.'
+              : 'Anda telah memberikan suara'}
+          </Text>
         </View>
+
+        {renderWinnerSection()}
 
         <View style={styles.thankYouSection}>
           <Text style={styles.thankYou}>
@@ -239,17 +356,29 @@ export default function Vote() {
         contentContainerStyle={styles.content}
       >
         <View style={styles.header}>
-          <Clock size={48} color="#F59E0B" />
-          <Text style={styles.title}>Voting Belum Tersedia</Text>
+          {isVotingFinished ? (
+            <Trophy size={48} color="#DC2626" />
+          ) : (
+            <Clock size={48} color="#F59E0B" />
+          )}
+          <Text style={styles.title}>
+            {isVotingFinished ? 'Voting Telah Selesai' : 'Voting Belum Tersedia'}
+          </Text>
           <Text style={styles.subtitle}>
-            {votingStatus?.message || 'Masa voting belum dimulai'}
+            {isVotingFinished
+              ? votingStatus?.message || 'Masa voting telah berakhir'
+              : votingStatus?.message || 'Masa voting belum dimulai'}
           </Text>
         </View>
+
+        {renderWinnerSection()}
 
         {votingStatus?.schedule && (
           <View style={styles.scheduleCard}>
             <View style={styles.scheduleHeader}>
-              {isVotingDay ? (
+              {isVotingFinished ? (
+                <Trophy size={20} color="#DC2626" />
+              ) : isVotingDay ? (
                 <Timer size={20} color="#10B981" />
               ) : (
                 <Calendar size={20} color="#DC2626" />
@@ -258,7 +387,16 @@ export default function Vote() {
             </View>
 
             <View style={styles.scheduleContent}>
-              {isVotingDay ? (
+              {isVotingFinished ? (
+                <>
+                  <Text style={styles.scheduleLabel}>
+                    Masa voting telah berakhir.
+                  </Text>
+                  <Text style={styles.scheduleTime}>
+                    Berakhir: {formatDateTime(votingStatus.schedule.end_time)}
+                  </Text>
+                </>
+              ) : isVotingDay ? (
                 <>
                   <Text style={styles.scheduleLabel}>
                     Voting sedang berlangsung!
@@ -362,8 +500,9 @@ export default function Vote() {
 
         <View style={styles.infoSection}>
           <Text style={styles.infoText}>
-            Silakan kembali saat masa voting telah dimulai untuk menggunakan hak
-            pilih Anda.
+            {isVotingFinished
+              ? 'Pemungutan suara telah selesai. Pantau pengumuman resmi untuk informasi selengkapnya.'
+              : 'Silakan kembali saat masa voting telah dimulai untuk menggunakan hak pilih Anda.'}
           </Text>
           <CustomButton
             title="Kembali ke Beranda"
@@ -706,5 +845,55 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 24,
+  },
+  winnerCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  winnerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  winnerTitle: {
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
+    color: '#111827',
+    marginLeft: 12,
+  },
+  winnerName: {
+    fontSize: 20,
+    fontFamily: 'Inter-Bold',
+    color: '#DC2626',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  winnerStats: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#374151',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  winnerLoadingText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+  winnerErrorText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#DC2626',
+    textAlign: 'center',
   },
 });
