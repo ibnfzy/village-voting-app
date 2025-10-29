@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { User } from '@/types/election';
 import { buildApiUrl, API_CONFIG } from '@/config/api';
 
@@ -13,21 +13,16 @@ interface AuthContextType {
     | 'nik not found'
     | 'pemilih not found'
   >;
-  registerUser: (
-    username: string
-  ) => Promise<'user created' | 'username not available'>;
   registerPemilih: (
-    pemilihData: PemilihRegistrationData
+    pemilihData: PemilihRegistrationPayload
   ) => Promise<
     'registration successful' | 'email not available' | 'nik not available'
   >;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
-  tempUserId: number | null;
 }
 
 export interface PemilihRegistrationData {
-  user_id: number;
   nik: string;
   name: string;
   tempat_lahir?: string;
@@ -43,11 +38,19 @@ export interface PemilihRegistrationData {
   email: string;
 }
 
+export interface PemilihRegistrationPayload
+  extends PemilihRegistrationData {
+  file_ktp: {
+    uri: string;
+    name: string;
+    type: string;
+  };
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [tempUserId, setTempUserId] = useState<number | null>(null);
 
   const login = async (
     nik: string
@@ -98,60 +101,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const registerUser = async (
-    username: string
-  ): Promise<'user created' | 'username not available'> => {
-    try {
-      const response = await fetch(
-        buildApiUrl(API_CONFIG.ROUTES.AUTH.REGISTER_USER),
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.status === 'user created') {
-        setTempUserId(data.user_id);
-        return 'user created';
-      } else if (data.status === 'username not available') {
-        return 'username not available';
-      }
-
-      // Fallback for unexpected responses
-      return 'username not available';
-    } catch (error) {
-      console.error('User registration error:', error);
-      return 'username not available';
-    }
-  };
-
   const registerPemilih = async (
-    pemilihData: PemilihRegistrationData
+    pemilihData: PemilihRegistrationPayload
   ): Promise<
     'registration successful' | 'email not available' | 'nik not available'
   > => {
     try {
+      const formData = new FormData();
+
+      Object.entries(pemilihData).forEach(([key, value]) => {
+        if (key === 'file_ktp') {
+          const fileValue = pemilihData.file_ktp;
+          formData.append('file_ktp', {
+            uri: fileValue.uri,
+            name: fileValue.name,
+            type: fileValue.type,
+          } as any);
+        } else if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+
       const response = await fetch(
         buildApiUrl(API_CONFIG.ROUTES.AUTH.REGISTER_PEMILIH),
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'multipart/form-data',
           },
-          body: JSON.stringify(pemilihData),
+          body: formData,
         }
       );
 
       const data = await response.json();
 
       if (data.status === 'registration successful') {
-        // setUser(data.user);
-        setTempUserId(null);
         return 'registration successful';
       } else if (data.status === 'email not available') {
         return 'email not available';
@@ -169,7 +153,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    setTempUserId(null);
   };
 
   const updateUser = (updates: Partial<User>) => {
@@ -183,11 +166,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         login,
-        registerUser,
         registerPemilih,
         logout,
         updateUser,
-        tempUserId,
       }}
     >
       {children}
