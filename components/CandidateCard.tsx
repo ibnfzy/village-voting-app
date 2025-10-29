@@ -1,42 +1,66 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { Star } from 'lucide-react-native';
 import { Candidate } from '@/types/election';
 
 interface CandidateCardProps {
   candidate: Candidate;
   onPress: () => void;
+  variant?: 'full' | 'compact';
 }
 
-export function CandidateCard({ candidate, onPress }: CandidateCardProps) {
+export function CandidateCard({
+  candidate,
+  onPress,
+  variant = 'full',
+}: CandidateCardProps) {
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      <View style={styles.header}>
-        <Image source={{ uri: candidate.photo }} style={styles.photo} />
-        <View style={styles.info}>
-          <Text style={styles.name}>{candidate.name}</Text>
+    <TouchableOpacity
+      style={[styles.card, variant === 'compact' && styles.compactCard]}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <View
+        style={[styles.header, variant === 'compact' && styles.compactHeader]}
+      >
+        {variant === 'full' && (
+          <Image source={{ uri: candidate.photo }} style={styles.photo} />
+        )}
+        <View
+          style={[styles.info, variant === 'compact' && styles.compactInfo]}
+        >
+          <Text
+            style={[styles.name, variant === 'compact' && styles.compactName]}
+          >
+            {candidate.name}
+          </Text>
         </View>
       </View>
 
-      <View style={styles.visionContainer}>
-      <Text style={styles.visionLabel}>Visi:</Text>
-      {candidate.visi.map((v, i) => (
-        <Text key={i} style={styles.vision}>
-          • {v}
-        </Text>
-      ))}
-    </View>
+      {variant === 'full' && (
+        <>
+          <View style={styles.visionContainer}>
+            <Text style={styles.visionLabel}>Visi:</Text>
+            {candidate.visi.map((v, i) => (
+              <Text key={i} style={styles.vision}>
+                • {v}
+              </Text>
+            ))}
+          </View>
 
-    <View style={styles.visionContainer}>
-      <Text style={styles.visionLabel}>Misi:</Text>
-      {candidate.misi.map((m, i) => (
-        <Text key={i} style={styles.vision}>
-          • {m}
-        </Text>
-      ))}
-    </View>
+          <View style={styles.visionContainer}>
+            <Text style={styles.visionLabel}>Misi:</Text>
+            {candidate.misi.map((m, i) => (
+              <Text key={i} style={styles.vision}>
+                • {m}
+              </Text>
+            ))}
+          </View>
+        </>
+      )}
 
-      <View style={styles.footer}>
+      <View
+        style={[styles.footer, variant === 'compact' && styles.compactFooter]}
+      >
         <Text style={styles.viewMore}>Lihat Detail →</Text>
       </View>
     </TouchableOpacity>
@@ -59,6 +83,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 16,
   },
+  compactCard: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+  },
   photo: {
     width: 80,
     height: 80,
@@ -69,11 +97,22 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
+  compactInfo: {
+    justifyContent: 'flex-start',
+  },
   name: {
     fontSize: 18,
     fontFamily: 'Inter-Bold',
     color: '#111827',
     marginBottom: 4,
+  },
+  compactHeader: {
+    marginBottom: 0,
+    alignItems: 'flex-start',
+  },
+  compactName: {
+    fontSize: 16,
+    marginBottom: 0,
   },
   party: {
     fontSize: 14,
@@ -114,6 +153,10 @@ const styles = StyleSheet.create({
   },
   footer: {
     alignItems: 'flex-end',
+  },
+  compactFooter: {
+    marginTop: 8,
+    alignItems: 'flex-start',
   },
   viewMore: {
     fontSize: 14,
