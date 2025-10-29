@@ -1,4 +1,4 @@
-import { Vote, VotingStatus, Schedule } from '@/types/election';
+import { Vote, VotingStatus, Schedule, VotingWinner } from '@/types/election';
 import { buildApiUrl, API_CONFIG } from '@/config/api';
 
 export class VotingService {
@@ -95,15 +95,37 @@ export class VotingService {
       });
 
       const data = await response.json();
-      
+
       if (data.status === 'success') {
         return data.data || [];
       }
-      
+
       return [];
     } catch (error) {
       console.error('Error fetching voting results:', error);
       return [];
+    }
+  }
+
+  static async getVotingWinner(): Promise<VotingWinner | null> {
+    try {
+      const response = await fetch(buildApiUrl(API_CONFIG.ROUTES.VOTING.WINNER), {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        return data.data || null;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error fetching voting winner:', error);
+      return null;
     }
   }
 }
