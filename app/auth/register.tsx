@@ -28,7 +28,11 @@ import {
   UploadCloud,
 } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import { Camera as ExpoCamera, CameraType } from 'expo-camera';
+import {
+  Camera as ExpoCamera,
+  CameraView,
+  type CameraType,
+} from 'expo-camera';
 
 import { CustomButton } from '@/components/CustomButton';
 import {
@@ -50,7 +54,7 @@ export default function Register() {
     name: '',
     tempat_lahir: '',
     tanggal_lahir: '',
-    jenis_kelamin: '',
+    jenis_kelamin: undefined,
     alamat: '',
     rt: '',
     rw: '',
@@ -67,7 +71,8 @@ export default function Register() {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(
     null
   );
-  const cameraRef = useRef<ExpoCamera | null>(null);
+  const cameraFacing: CameraType = 'back';
+  const cameraRef = useRef<CameraView | null>(null);
 
   const ensureCameraPermission = useCallback(async () => {
     const { status } = await ExpoCamera.requestCameraPermissionsAsync();
@@ -80,8 +85,24 @@ export default function Register() {
     ensureCameraPermission();
   }, [ensureCameraPermission]);
 
-  const handleInputChange = (field: keyof PemilihRegistrationData, value: string) => {
+  const handleInputChange = (
+    field: keyof PemilihRegistrationData,
+    value: string
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleGenderChange = (value: string) => {
+    const formatted = value.toUpperCase();
+
+    if (formatted === 'L' || formatted === 'P') {
+      setFormData((prev) => ({ ...prev, jenis_kelamin: formatted }));
+      return;
+    }
+
+    if (value.trim() === '') {
+      setFormData((prev) => ({ ...prev, jenis_kelamin: undefined }));
+    }
   };
 
   const handlePickDocument = async () => {
@@ -185,7 +206,7 @@ export default function Register() {
     try {
       const payload: PemilihRegistrationPayload = {
         ...formData,
-        jenis_kelamin: formData.jenis_kelamin as 'L' | 'P' | undefined,
+        jenis_kelamin: formData.jenis_kelamin,
         file_ktp: {
           uri:
             Platform.OS === 'ios'
@@ -299,10 +320,8 @@ export default function Register() {
             <TextInput
               style={styles.input}
               placeholder="Jenis Kelamin (L/P)"
-              value={formData.jenis_kelamin}
-              onChangeText={(value) =>
-                handleInputChange('jenis_kelamin', value.toUpperCase())
-              }
+              value={formData.jenis_kelamin ?? ''}
+              onChangeText={handleGenderChange}
               maxLength={1}
               placeholderTextColor="#9CA3AF"
             />
@@ -467,13 +486,7 @@ export default function Register() {
 
       <Modal visible={isCameraVisible} animationType="slide">
         <View style={styles.cameraModal}>
-          <ExpoCamera
-            ref={(ref) => {
-              cameraRef.current = ref;
-            }}
-            style={styles.camera}
-            type={CameraType.back}
-          >
+          <CameraView ref={cameraRef} style={styles.camera} facing={cameraFacing}>
             <View style={styles.cameraOverlay}>
               <TouchableOpacity
                 style={styles.closeCameraButton}
@@ -488,7 +501,7 @@ export default function Register() {
                 <Text style={styles.captureButtonText}>Ambil Foto</Text>
               </TouchableOpacity>
             </View>
-          </ExpoCamera>
+          </CameraView>
         </View>
       </Modal>
     </>
