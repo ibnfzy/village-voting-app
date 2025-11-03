@@ -29,7 +29,14 @@
     "plugins": [
       "expo-router",
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Kami membutuhkan akses kamera untuk mengambil foto.",
+          "microphonePermission": "Kami membutuhkan akses mikrofon untuk merekam video."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
