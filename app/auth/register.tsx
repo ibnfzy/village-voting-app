@@ -1,9 +1,4 @@
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-  useRef,
-} from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -28,11 +23,7 @@ import {
   UploadCloud,
 } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import {
-  Camera as ExpoCamera,
-  CameraView,
-  type CameraType,
-} from 'expo-camera';
+import { Camera as ExpoCamera, CameraView, type CameraType } from 'expo-camera';
 
 import { CustomButton } from '@/components/CustomButton';
 import {
@@ -68,9 +59,9 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isCameraVisible, setIsCameraVisible] = useState(false);
-  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(
-    null
-  );
+  const [hasCameraPermission, setHasCameraPermission] = useState<
+    boolean | null
+  >(null);
   const cameraFacing: CameraType = 'back';
   const cameraRef = useRef<CameraView | null>(null);
 
@@ -122,7 +113,10 @@ export default function Register() {
         });
       }
     } catch (pickError) {
-      Alert.alert('Gagal mengunggah', 'Terjadi kesalahan saat memilih dokumen.');
+      Alert.alert(
+        'Gagal mengunggah',
+        'Terjadi kesalahan saat memilih dokumen.'
+      );
     }
   };
 
@@ -238,7 +232,10 @@ export default function Register() {
 
   return (
     <>
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+      >
         <View style={styles.header}>
           <CustomButton
             title="←"
@@ -250,13 +247,6 @@ export default function Register() {
           <Text style={styles.title}>Buat Akun</Text>
           <Text style={styles.subtitle}>
             Lengkapi data KTP Anda untuk menyelesaikan registrasi
-          </Text>
-        </View>
-
-        <View style={styles.infoBox}>
-          <Text style={styles.infoText}>
-            Setelah registrasi selesai, Anda akan menerima password dari panitia
-            pemilihan untuk dapat login dan voting
           </Text>
         </View>
 
@@ -310,7 +300,9 @@ export default function Register() {
               style={styles.input}
               placeholder="Tanggal Lahir (YYYY-MM-DD)"
               value={formData.tanggal_lahir}
-              onChangeText={(value) => handleInputChange('tanggal_lahir', value)}
+              onChangeText={(value) =>
+                handleInputChange('tanggal_lahir', value)
+              }
               placeholderTextColor="#9CA3AF"
             />
           </View>
@@ -429,7 +421,11 @@ export default function Register() {
               style={styles.uploadButton}
               onPress={handlePickDocument}
             >
-              <UploadCloud size={20} color="#DC2626" style={styles.uploadIcon} />
+              <UploadCloud
+                size={20}
+                color="#DC2626"
+                style={styles.uploadIcon}
+              />
               <Text style={styles.uploadButtonText}>Unggah Dokumen</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -444,7 +440,10 @@ export default function Register() {
           {ktpFile ? (
             <View style={styles.filePreview}>
               {isImageFile ? (
-                <Image source={{ uri: ktpFile.uri }} style={styles.ktpPreview} />
+                <Image
+                  source={{ uri: ktpFile.uri }}
+                  style={styles.ktpPreview}
+                />
               ) : (
                 <View style={styles.fileInfo}>
                   <Text style={styles.fileName}>{ktpFile.name}</Text>
@@ -486,7 +485,11 @@ export default function Register() {
 
       <Modal visible={isCameraVisible} animationType="slide">
         <View style={styles.cameraModal}>
-          <CameraView ref={cameraRef} style={styles.camera} facing={cameraFacing}>
+          <CameraView
+            ref={cameraRef}
+            style={styles.camera}
+            facing={cameraFacing}
+          >
             <View style={styles.cameraOverlay}>
               <TouchableOpacity
                 style={styles.closeCameraButton}
