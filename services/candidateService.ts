@@ -1,6 +1,31 @@
 import { Candidate } from '@/types/election';
 import { buildApiUrl, buildRouteWithParams, API_CONFIG } from '@/config/api';
 
+function stripHtmlTags(value: unknown): string {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  return value.replace(/<[^>]*>/g, '').trim();
+}
+
+function sanitizeCandidate(candidate: Candidate): Candidate {
+  const sanitizeArray = (items: unknown): string[] => {
+    if (!Array.isArray(items)) {
+      return [];
+    }
+
+    return items
+      .map((item) => stripHtmlTags(item))
+      .filter((item) => item.length > 0);
+  };
+
+  return {
+    ...candidate,
+    misi: sanitizeArray(candidate.misi),
+  };
+}
+
 export class CandidateService {
   static async getAllCandidates(): Promise<Candidate[]> {
     try {
@@ -14,7 +39,8 @@ export class CandidateService {
       const data = await response.json();
       
       if (data.status === 'success') {
-        return data.data || [];
+        const candidates = (Array.isArray(data.data) ? data.data : []) as Candidate[];
+        return candidates.map((candidate) => sanitizeCandidate(candidate));
       }
       
       return [];
@@ -39,8 +65,8 @@ export class CandidateService {
 
       const data = await response.json();
       
-      if (data.status === 'success') {
-        return data.data || null;
+      if (data.status === 'success' && data.data) {
+        return sanitizeCandidate(data.data as Candidate);
       }
       
       return null;
