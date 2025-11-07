@@ -22,7 +22,6 @@ function sanitizeCandidate(candidate: Candidate): Candidate {
 
   return {
     ...candidate,
-    visi: sanitizeArray(candidate.visi),
     misi: sanitizeArray(candidate.misi),
   };
 }
