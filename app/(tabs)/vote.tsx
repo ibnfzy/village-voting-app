@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Image } from 'react-native';
 import { router } from 'expo-router';
 import {
   Vote as VoteIcon,
@@ -287,6 +287,13 @@ export default function Vote() {
           <Text style={styles.winnerErrorText}>{winnerError}</Text>
         ) : votingWinner ? (
           <>
+            {votingWinner.photo ? (
+              <Image
+                source={{ uri: votingWinner.photo }}
+                style={styles.winnerPhoto}
+                resizeMode="cover"
+              />
+            ) : null}
             <Text style={styles.winnerName}>{votingWinner.candidate_name}</Text>
             {typeof votingWinner.vote_count === 'number' && (
               <Text style={styles.winnerStats}>
@@ -864,6 +871,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
+  },
+  winnerPhoto: {
+    width: 160,
+    height: 160,
+    borderRadius: 16,
+    alignSelf: 'center',
+    marginBottom: 16,
+    backgroundColor: '#F3F4F6',
   },
   winnerTitle: {
     fontSize: 16,
