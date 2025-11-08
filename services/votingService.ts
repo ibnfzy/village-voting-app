@@ -119,7 +119,23 @@ export class VotingService {
       const data = await response.json();
 
       if (data.status === 'success') {
-        return data.data || null;
+        const winnerData = Array.isArray(data.data)
+          ? data.data[0]
+          : data.data;
+
+        if (!winnerData) {
+          return null;
+        }
+
+        return {
+          candidate_id: Number(winnerData.candidate_id),
+          candidate_name: winnerData.candidate_name,
+          vote_count: Number(winnerData.vote_count),
+          percentage: winnerData.percentage
+            ? Number(winnerData.percentage)
+            : undefined,
+          photo: winnerData.photo,
+        };
       }
 
       return null;
